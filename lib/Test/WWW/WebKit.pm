@@ -30,13 +30,13 @@ None by default.
 use 5.10.0;
 use Moose;
 
-extends 'WWW::WebKit';
+extends 'WWW::WebKit' => { -version => 0.03 };
 
 use Glib qw(TRUE FALSE);
 use Time::HiRes qw(time usleep);
 use Test::More;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 sub open_ok {
     my ($self, $url) = @_;
@@ -234,7 +234,52 @@ sub submit_ok {
     ok($self->submit($locator), "submit_ok($locator)");
 }
 
+sub eval_is {
+    my ($self, $js, $expr) = @_;
+
+    is($self->eval_js($js), $expr, "eval_is($expr)");
+}
+
+sub check_ok {
+    my ($self, $locator) = @_;
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+
+    ok($self->check($locator), "check_ok($locator)");
+}
+
+sub uncheck_ok {
+    my ($self, $locator) = @_;
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+
+    ok($self->uncheck($locator), "uncheck_ok($locator)");
+}
+
+sub print_requested_ok {
+    my ($self) = @_;
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+
+    ok($self->print_requested, "print_requested_ok");
+}
+
 =head2 Additions to the Selenium API
+
+=head3 wait_for_alert_ok($text, $timeout)
+
+Wait for an alert with the given text to happen.
+If $text is undef, it waits for any alert. Since alerts do not get automatically cleared, this has to be done manually before causing the action that is supposed to throw a new alert:
+
+    $webkit->alerts([]);
+    $webkit->click('...');
+    $webkit->wait_for_alert;
+
+=cut
+
+sub wait_for_alert_ok {
+    my ($self, $text, $timeout) = @_;
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+
+    ok($self->wait_for_alert($text, $timeout), "wait_for_alert_ok($text)");
+}
 
 =head3 native_drag_and_drop_to_object_ok($source, $target)
 
