@@ -30,13 +30,13 @@ None by default.
 use 5.10.0;
 use Moose;
 
-extends 'WWW::WebKit' => { -version => 0.03 };
+extends 'WWW::WebKit' => { -version => 0.06 };
 
 use Glib qw(TRUE FALSE);
 use Time::HiRes qw(time usleep);
 use Test::More;
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 sub open_ok {
     my ($self, $url) = @_;
@@ -102,6 +102,13 @@ sub wait_for_element_to_disappear_ok {
     $timeout ||= $self->default_timeout;
 
     ok($self->wait_for_element_to_disappear($locator, $timeout), "wait_for_element_to_disappear_ok($locator, $timeout, $description)");
+}
+
+sub wait_for_condition_ok {
+    my ($self, $condition, $timeout, $description) = @_;
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+
+    ok($self->wait_for_condition($condition, $timeout), $description);
 }
 
 sub is_element_present_ok {
@@ -278,20 +285,40 @@ sub wait_for_alert_ok {
     my ($self, $text, $timeout) = @_;
     local $Test::Builder::Level = $Test::Builder::Level + 1;
 
-    ok($self->wait_for_alert($text, $timeout), "wait_for_alert_ok($text)");
+    ok($self->wait_for_alert($text, $timeout), "wait_for_alert_ok($text)")
+        or diag(
+            @{ $self->alerts }
+            ? 'Last alert was: "' . $self->alerts->[-1] . '"'
+            : 'No alert occured'
+        );
 }
 
-=head3 native_drag_and_drop_to_object_ok($source, $target)
+=head3 native_drag_and_drop_to_position_ok($source, $target_x, $target_y, $options)
 
-Drag&drop test that works with native HTML5 D&D events.
+Drag and drop $source to position ($target_x and $target_y)
+
+=cut
+
+sub native_drag_and_drop_to_position_ok {
+    my ($self, $source, $target_x, $target_y, $options) = @_;
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+
+    $self->native_drag_and_drop_to_position($source, $target_x, $target_y, $options);
+
+    ok(1, "native_drag_and_drop_to_position_ok($source, $target_x, $target_y)");
+}
+
+=head3 native_drag_and_drop_to_object_ok($source, $target, $options)
+
+Drag and drop $source to $target.
 
 =cut
 
 sub native_drag_and_drop_to_object_ok {
-    my ($self, $source, $target) = @_;
+    my ($self, $source, $target, $options) = @_;
     local $Test::Builder::Level = $Test::Builder::Level + 1;
 
-    $self->native_drag_and_drop_to_object($source, $target);
+    $self->native_drag_and_drop_to_object($source, $target, $options);
 
     ok(1, "native_drag_and_drop_to_object_ok($source, $target)");
 }
