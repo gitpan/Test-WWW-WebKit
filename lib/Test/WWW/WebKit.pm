@@ -285,7 +285,7 @@ sub wait_for_alert_ok {
     my ($self, $text, $timeout) = @_;
     local $Test::Builder::Level = $Test::Builder::Level + 1;
 
-    ok($self->wait_for_alert($text, $timeout), "wait_for_alert_ok($text)")
+    ok($self->wait_for_alert($text, $timeout), 'wait_for_alert_ok(' . ($text // '') . ')')
         or diag(
             @{ $self->alerts }
             ? 'Last alert was: "' . $self->alerts->[-1] . '"'
